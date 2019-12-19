@@ -61,15 +61,15 @@ func (r *Controller) programIptableRulesForInterClusterTraffic(remoteCidrBlock s
 	for _, localClusterCidr := range r.localClusterCidr {
 		ruleSpec := []string{"-s", localClusterCidr, "-d", remoteCidrBlock, "-j", "ACCEPT"}
 		klog.V(4).Infof("Installing iptables rule for outgoing traffic: %s", strings.Join(ruleSpec, " "))
-		if err = ipt.AppendUnique("nat", SmPostRoutingChain, ruleSpec...); err != nil {
-			return fmt.Errorf("error appending iptables rule \"%s\": %v\n", strings.Join(ruleSpec, " "), err)
+		if err = ipt.Insert("nat", SmPostRoutingChain, 1, ruleSpec...); err != nil {
+			return fmt.Errorf("error inserting iptables rule \"%s\": %v\n", strings.Join(ruleSpec, " "), err)
 		}
 
 		// TODO: revisit, we only have to program rules to allow traffic from the podCidr
 		ruleSpec = []string{"-s", remoteCidrBlock, "-d", localClusterCidr, "-j", "ACCEPT"}
 		klog.V(4).Infof("Installing iptables rule for incoming traffic: %s", strings.Join(ruleSpec, " "))
-		if err = ipt.AppendUnique("nat", SmPostRoutingChain, ruleSpec...); err != nil {
-			return fmt.Errorf("error appending iptables rule \"%s\": %v\n", strings.Join(ruleSpec, " "), err)
+		if err = ipt.Insert("nat", SmPostRoutingChain, 1, ruleSpec...); err != nil {
+			return fmt.Errorf("error inserting iptables rule \"%s\": %v\n", strings.Join(ruleSpec, " "), err)
 		}
 	}
 	return nil
