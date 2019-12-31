@@ -50,5 +50,5 @@ func (i *Controller) doesIPTablesChainExist(table, chain string) (bool, error) {
 			return true, nil
 		}
 	}
-	return false, fmt.Errorf("chain %s does not exist", chain)
+	return false, nil
 }

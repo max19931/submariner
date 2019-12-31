@@ -20,7 +20,7 @@ func (i *Controller) initIPTableChains() error {
 
 	forwardToSubGlobalNetChain := []string{"-j", submarinerIngress}
 	if err := util.PrependUnique(i.ipt, "nat", "PREROUTING", forwardToSubGlobalNetChain); err != nil {
-		klog.Errorf("error appending iptables rule \"%s\": %v\n", strings.Join(forwardToSubGlobalNetChain, " "), err)
+		klog.Errorf("error appending iptables rule %q: %v\n", strings.Join(forwardToSubGlobalNetChain, " "), err)
 	}
 
 	klog.V(4).Infof("Install/ensure %s chain exists", submarinerEgress)
@@ -35,7 +35,7 @@ func (i *Controller) initIPTableChains() error {
 
 	forwardToSubGlobalNetChain = []string{"-j", submarinerEgress}
 	if err := i.ipt.AppendUnique("nat", route.SmPostRoutingChain, forwardToSubGlobalNetChain...); err != nil {
-		klog.Errorf("error appending iptables rule \"%s\": %v\n", strings.Join(forwardToSubGlobalNetChain, " "), err)
+		klog.Errorf("error appending iptables rule %q: %v\n", strings.Join(forwardToSubGlobalNetChain, " "), err)
 	}
 	return nil
 }

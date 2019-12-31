@@ -35,19 +35,19 @@ func NewGatewayMonitor(spec *SubmarinerIpamControllerSpecification, cfg *rest.Co
 
 	clientSet, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		klog.Fatalf("Error building k8s clientset: %s", err.Error())
+		return nil, fmt.Errorf("error building k8s clientset: %s", err.Error())
 	}
 
 	submarinerClient, err := submarinerClientset.NewForConfig(cfg)
 	if err != nil {
-		klog.Fatalf("Error building submariner clientset: %s", err.Error())
+		return nil, fmt.Errorf("error building submariner clientset: %s", err.Error())
 	}
 
 	submarinerInformerFactory := submarinerInformers.NewSharedInformerFactoryWithOptions(submarinerClient,
 		time.Second*30, submarinerInformers.WithNamespace(spec.Namespace))
 	EndpointInformer := submarinerInformerFactory.Submariner().V1().Endpoints()
 
-	gatewayMonitor.KubeClientSet = clientSet
+	gatewayMonitor.kubeClientSet = clientSet
 	gatewayMonitor.submarinerClientSet = submarinerClient
 	gatewayMonitor.endpointsSynced = EndpointInformer.Informer().HasSynced
 
@@ -66,8 +66,6 @@ func NewGatewayMonitor(spec *SubmarinerIpamControllerSpecification, cfg *rest.Co
 }
 
 func (i *GatewayMonitor) Run(stopCh <-chan struct{}) error {
-	var wg sync.WaitGroup
-	wg.Add(1)
 	defer utilruntime.HandleCrash()
 
 	klog.Info("Starting GatewayMonitor to monitor the active Gateway node in the cluster.")
@@ -79,7 +77,6 @@ func (i *GatewayMonitor) Run(stopCh <-chan struct{}) error {
 
 	klog.Info("Starting endpoint worker.")
 	go wait.Until(i.runEndpointWorker, time.Second, stopCh)
-	wg.Wait()
 	<-stopCh
 	klog.Info("Shutting down endpoint worker.")
 	return nil
@@ -192,10 +189,10 @@ func (i *GatewayMonitor) handleRemovedEndpoint(obj interface{}) {
 }
 
 func (i *GatewayMonitor) initializeIpamController() {
-	informerFactory := informers.NewSharedInformerFactoryWithOptions(i.KubeClientSet, defaultResync)
+	informerFactory := informers.NewSharedInformerFactoryWithOptions(i.kubeClientSet, defaultResync)
 
 	informerConfig := InformerConfigStruct{
-		KubeClientSet:   i.KubeClientSet,
+		KubeClientSet:   i.kubeClientSet,
 		ServiceInformer: informerFactory.Core().V1().Services(),
 		PodInformer:     informerFactory.Core().V1().Pods(),
 	}

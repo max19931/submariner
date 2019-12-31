@@ -40,7 +40,7 @@ type Controller struct {
 
 type GatewayMonitor struct {
 	clusterID           string
-	KubeClientSet       kubernetes.Interface
+	kubeClientSet       kubernetes.Interface
 	submarinerClientSet clientset.Interface
 	endpointWorkqueue   workqueue.RateLimitingInterface
 	endpointsSynced     cache.InformerSynced
