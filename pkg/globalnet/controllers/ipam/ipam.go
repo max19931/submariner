@@ -387,6 +387,9 @@ func (i *Controller) serviceUpdater(obj runtime.Object, key string) error {
 	// or when the existing annotation on the Service does not match with the allocated globalIp.
 	if allocatedIp != "" {
 		annotations := service.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
 		annotations[submarinerIpamGlobalIp] = allocatedIp
 		service.SetAnnotations(annotations)
 		i.syncServiceRules(service, allocatedIp, AddRules)
@@ -415,6 +418,9 @@ func (i *Controller) podUpdater(obj runtime.Object, key string) error {
 	// or when the existing annotation on the POD does not match with the allocated globalIp.
 	if allocatedIp != "" {
 		annotations := pod.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
 		annotations[submarinerIpamGlobalIp] = allocatedIp
 		pod.SetAnnotations(annotations)
 		i.syncPodRules(pod.Status.PodIP, allocatedIp, AddRules)
