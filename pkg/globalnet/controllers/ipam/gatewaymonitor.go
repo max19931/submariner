@@ -97,15 +97,18 @@ func (i *GatewayMonitor) processNextEndpoint() bool {
 		key := obj.(string)
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
+			i.endpointWorkqueue.Forget(obj)
 			return fmt.Errorf("error while splitting meta namespace key %s: %v", key, err)
 		}
 		endpoint, err := i.submarinerClientSet.SubmarinerV1().Endpoints(ns).Get(name, metav1.GetOptions{})
 		if err != nil {
+			i.endpointWorkqueue.Forget(obj)
 			return fmt.Errorf("error retrieving submariner endpoint object %s: %v", name, err)
 		}
 
 		if endpoint.Spec.ClusterID != i.clusterID {
 			klog.V(6).Infof("Endpoint didn't match the cluster ID of this cluster")
+			i.endpointWorkqueue.Forget(obj)
 			return nil
 		}
 

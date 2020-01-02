@@ -99,20 +99,8 @@ func (i *Controller) Run(stopCh <-chan struct{}) error {
 	go wait.Until(i.runPodWorker, time.Second, stopCh)
 	<-stopCh
 	klog.Info("Shutting down workers")
-	i.cleanUp()
-	return nil
-}
-
-func (i *Controller) cleanUp() {
-	klog.Info("In cleanUp, freeing the allocated memory and iptables rules.")
-	// Free the allocated memory and the associated iptables rules programmed on the node.
 	i.cleanupIPTableRules()
-	for k := range i.excludeNamespaces {
-		delete(i.excludeNamespaces, k)
-	}
-	i.pool.ClearAll()
-	i.pool = nil
-	i.ipt = nil
+	return nil
 }
 
 func (i *Controller) runServiceWorker() {

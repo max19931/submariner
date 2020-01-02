@@ -110,15 +110,3 @@ func (p *IpPool) RequestIp(key string, ip string) (string, error) {
 	// It is neither allocated for this key, nor available, give another.
 	return p.Allocate(key)
 }
-
-func (p *IpPool) ClearAll() {
-	p.Lock()
-	for i := range p.allocated {
-		delete(p.allocated, i)
-	}
-
-	for i := range p.available {
-		delete(p.available, i)
-	}
-	p.Unlock()
-}
